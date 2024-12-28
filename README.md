@@ -115,7 +115,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - 🌐 Portfolio: [Your Portfolio]
 - 📧 Email: [Your Email]
 - 💼 LinkedIn: [Your LinkedIn]
-- 🐱 GitHub: [Your GitHub]
+- 🐱 GitHub: [eminemahjoub](https://github.com/eminemahjoub)
 
 ## 🙏 Acknowledgments
 
