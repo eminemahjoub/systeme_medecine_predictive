@@ -33,7 +33,8 @@ A state-of-the-art medical prediction system leveraging advanced machine learnin
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/systeme_medecine_predictive.git
+
+https://github.com/eminemahjoub/systeme_medecine_predictive.git
 cd systeme_medecine_predictive
 ```
 
