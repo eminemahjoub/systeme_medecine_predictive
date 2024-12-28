@@ -53,17 +53,17 @@ python -m flask --app src/app.py run
 ```
 systeme_medecine_predictive/
 ├── src/
-│   ├── main.py              # Core prediction system
-│   ├── app.py              # Flask web application
+│   ├── main.py              
+│   ├── app.py             
 │   └── utils/
-│       ├── data_loader.py   # Data loading utilities
-│       ├── data_processor.py # Data preprocessing
-│       └── model_evaluator.py # Model evaluation tools
-├── models/                  # Trained model storage
-├── templates/              # Web interface templates
-├── tests/                  # Unit tests
-├── requirements.txt        # Project dependencies
-└── README.md              # Project documentation
+│       ├── data_loader.py   
+│       ├── data_processor.py 
+│       └── model_evaluator.py 
+├── models/                  
+├── templates/            
+├── tests/                
+├── requirements.txt        
+└── README.md             
 ```
 
 ## 💻 Usage
@@ -113,9 +113,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 👨‍💻 Author
 
 **Amine Mahjoub**
-- 🌐 Portfolio: [Your Portfolio]
-- 📧 Email: [Your Email]
-- 💼 LinkedIn: [Your LinkedIn]
+- 📧 Email: [eminmahjoub@gmail.com]
+- 💼 LinkedIn: [[amine mahjoub](https://www.linkedin.com/in/eminemahjoub/)]
 - 🐱 GitHub: [eminemahjoub](https://github.com/eminemahjoub)
 
 ## 🙏 Acknowledgments
