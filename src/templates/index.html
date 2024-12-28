@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medical Prediction System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/chart.js" rel="stylesheet">
+    <style>
+        .prediction-card {
+            transition: all 0.3s ease;
+        }
+        .prediction-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .feature-importance-chart {
+            max-height: 400px;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="#">Medical Prediction System</a>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="row">
+            <!-- Input Form -->
+            <div class="col-md-6">
+                <div class="card prediction-card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Patient Data Input</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="predictionForm">
+                            <div id="featureInputs">
+                                <!-- Feature inputs will be dynamically added here -->
+                            </div>
+                            <button type="submit" class="btn btn-primary">Predict</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Prediction Results -->
+            <div class="col-md-6">
+                <div class="card prediction-card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Prediction Results</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="predictionResults" style="display: none;">
+                            <h3 class="text-center mb-4">Risk Assessment</h3>
+                            <div class="text-center">
+                                <div class="display-4 mb-3" id="riskLevel"></div>
+                                <div class="progress mb-3">
+                                    <div class="progress-bar" id="probabilityBar" role="progressbar"></div>
+                                </div>
+                                <p class="lead" id="probability"></p>
+                            </div>
+                        </div>
+                        <div id="loadingSpinner" style="display: none;">
+                            <div class="d-flex justify-content-center">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Model Information -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Model Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <canvas id="featureImportanceChart"></canvas>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Performance Metrics</h6>
+                                <div id="performanceMetrics"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Initialize feature importance chart
+        let featureChart;
+
+        // Fetch model information on page load
+        document.addEventListener('DOMContentLoaded', async () => {
+            await fetchModelInfo();
+            setupForm();
+        });
+
+        async function fetchModelInfo() {
+            try {
+                const response = await fetch('/model-info');
+                const data = await response.json();
+                
+                // Update feature importance chart
+                updateFeatureImportanceChart(data.features);
+                
+                // Update performance metrics
+                updatePerformanceMetrics(data.performance_metrics);
+                
+                // Setup form inputs based on features
+                setupFeatureInputs(Object.keys(data.features));
+            } catch (error) {
+                console.error('Error fetching model info:', error);
+            }
+        }
+
+        function setupFeatureInputs(features) {
+            const container = document.getElementById('featureInputs');
+            features.forEach(feature => {
+                const div = document.createElement('div');
+                div.className = 'mb-3';
+                div.innerHTML = `
+                    <label class="form-label">${feature.replace(/_/g, ' ').toUpperCase()}</label>
+                    <input type="number" class="form-control" name="${feature}" required>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function updateFeatureImportanceChart(features) {
+            const ctx = document.getElementById('featureImportanceChart').getContext('2d');
+            if (featureChart) {
+                featureChart.destroy();
+            }
+            featureChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(features),
+                    datasets: [{
+                        label: 'Feature Importance',
+                        data: Object.values(features),
+                        backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        function updatePerformanceMetrics(metrics) {
+            const container = document.getElementById('performanceMetrics');
+            container.innerHTML = Object.entries(metrics)
+                .map(([key, value]) => `
+                    <div class="mb-2">
+                        <strong>${key}:</strong> ${typeof value === 'number' ? value.toFixed(3) : value}
+                    </div>
+                `)
+                .join('');
+        }
+
+        // Handle form submission
+        document.getElementById('predictionForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Show loading spinner
+            document.getElementById('loadingSpinner').style.display = 'block';
+            document.getElementById('predictionResults').style.display = 'none';
+            
+            // Collect form data
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+            
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                // Hide loading spinner
+                document.getElementById('loadingSpinner').style.display = 'none';
+                
+                // Show results
+                document.getElementById('predictionResults').style.display = 'block';
+                document.getElementById('riskLevel').textContent = result.risk_level;
+                document.getElementById('probability').textContent = 
+                    `Probability: ${(result.probability * 100).toFixed(1)}%`;
+                
+                // Update progress bar
+                const progressBar = document.getElementById('probabilityBar');
+                progressBar.style.width = `${result.probability * 100}%`;
+                progressBar.className = `progress-bar ${
+                    result.risk_level === 'High' ? 'bg-danger' :
+                    result.risk_level === 'Medium' ? 'bg-warning' :
+                    'bg-success'
+                }`;
+                
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred while making the prediction.');
+            }
+        });
+    </script>
+</body>
+</html>
